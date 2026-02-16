@@ -2,42 +2,61 @@ Railbookers AI Search Chatbot
 ==============================
 
 Author: Rajan Mishra
-Version: 2.0.0
+Version: 3.0.0
 Organisation: Railbookers Group
 
 
 Overview
 --------
 
-Railbookers AI Search is a full-stack conversational chatbot platform built for discovering
-rail vacation packages. The system walks users through an 8-step guided conversation covering
-destination preferences, traveller details, travel dates, trip purpose, special occasions,
-hotel tier, rail experience type, and budget range. At the end of the conversation, the engine
-returns a ranked set of matching packages drawn entirely from the verified database, with no
-fabricated or hallucinated content.
+Railbookers AI Search is a full-stack platform for discovering rail vacation packages.
+It consists of two primary interfaces:
 
-The backend pairs a structured SQL query layer with a TF-IDF retrieval augmented generation
-(RAG) engine. Together they score and rank results across 1,996 curated packages spanning
-54 countries and 6 global regions. The system is designed for enterprise deployment with
-connection pooling, per-IP rate limiting, session lifecycle management, and structured
-observability.
+1. Conversational Chatbot: An 8-step guided conversation covering destination preferences,
+   traveller details, travel dates, trip purpose, special occasions, hotel tier, rail
+   experience type, and budget range. The engine returns ranked matching packages drawn
+   entirely from the verified database.
+
+2. Package Finder: A production-grade search and browse interface with multi-mode destination
+   search (includes, starts in, ends in), dynamic cascading filters (Region, Trip Duration,
+   Trains, Vacation Type), real-time autosuggest, and card-based results with pricing,
+   itinerary links, and route visualisation. All data served live from PostgreSQL.
+
+The backend serves 1,995 curated packages spanning 54 countries, 6 global regions, and
+18 train operators. The recommendation engine scores results using weighted multi-factor
+algorithms across location match, duration fit, trip type alignment, hotel tier, and
+internal profitability ranking. Average search response time is under 40ms.
 
 
 Capabilities
 ------------
 
+  Chatbot:
   - 8-step guided conversational flow for travel planning
   - Hybrid recommendation engine combining TF-IDF vector similarity with SQL-based filtering
-  - Multi-factor scoring across location, duration, trip type, hotel tier, and profitability
-  - 1,996 verified packages imported from authoritative Excel source data
   - 10-language translation layer (English, French, Spanish, German, Italian, Hindi,
     Japanese, Chinese, Portuguese, Arabic)
-  - Zero hallucination guarantee: every option, suggestion, and result is drawn from the
-    live database
-  - Fuzzy string matching for destination and preference inputs with context-aware alternatives
-  - In-memory session store with configurable TTL and automatic background cleanup
-  - Per-IP rate limiting via SlowAPI (120 req/min chat, 100/min search, 60/min recommendations)
-  - Structured JSON logging, performance decorators, and Kubernetes-ready health probes
+  - Zero hallucination guarantee: every result is drawn from the live database
+  - Fuzzy string matching for destination and preference inputs
+  - In-memory session store with configurable TTL and automatic cleanup
+
+  Package Finder:
+  - Multi-mode destination search (Includes, Starts In, Ends In) with AND/OR row logic
+  - Dynamic cascading filters that update based on current result set
+  - 4 filter categories: Region (60 options), Trip Duration (2-34 days slider),
+    Trains (18 operators), Vacation Type (39 types)
+  - Real-time autosuggest across cities, countries, regions, and package names
+  - Sort by Most Popular, Duration (ascending/descending), or Rank
+  - Production-matched card layout with route visualisation, pricing, gold accent design
+  - Paginated chip selectors with search within each filter panel
+  - Instant search with sub-40ms average response time from PostgreSQL
+
+  Infrastructure:
+  - Multi-factor scoring across location, duration, trip type, hotel tier, and profitability
+  - 1,995 verified packages imported from authoritative source data
+  - Per-IP rate limiting via SlowAPI
+  - Structured JSON logging, performance decorators, and health probes
+  - PostgreSQL with connection pooling and parameterised queries
 
 
 System Architecture
@@ -46,29 +65,38 @@ System Architecture
 ```
 +----------------------------------------------------------+
 |                   Frontend (Port 3000)                    |
-|  Vanilla JS, Chat Interface, Language Switcher            |
-|  Components: ChatInput, ChatMessage, DatePicker,          |
-|              MultiSelect, LanguageSwitcher                 |
+|                                                          |
+|  Chat Interface         Package Finder                   |
+|  index.html / main.js   recommend.html / recommend.js    |
+|  premium-chat.css        recommend.css                   |
+|                                                          |
+|  Detail Page            Shared Components                |
+|  detail.html / detail.js  ChatInput, DatePicker,         |
+|  detail.css               MultiSelect, LanguageSwitcher  |
 +----------------------------+-----------------------------+
                              |  HTTP / REST API
 +----------------------------v-----------------------------+
 |                 FastAPI Backend (Port 8890)               |
 |                                                          |
-|   Planner Router    Health Probes    i18n Translations    |
+|   Planner Router     Recommendation Router               |
+|   (Chat Flow)        (Search, Filters, Autosuggest)      |
+|                                                          |
+|   Health Probes      i18n Translations                   |
 |         |                                                |
 |   Service Layer                                          |
-|     Recommender (Scoring)                                |
+|     Recommendation Engine (SQL + Scoring)                |
+|     Recommender (TF-IDF + Cosine Similarity)             |
 |     DB Options (Lookups)                                 |
-|     Vector Store (TF-IDF / Cosine Similarity)            |
 |         |                                                |
 |   Database Layer (SQLAlchemy ORM)                        |
 |     Connection Pooling, Health Checks, Auto Recycle      |
 +----------------------------+-----------------------------+
                              |
               +--------------v--------------+
-              |    PostgreSQL / SQLite      |
-              |    1,996 packages           |
-              |    TF-IDF vectors           |
+              |    PostgreSQL 16            |
+              |    Database: rail_planner   |
+              |    1,995 packages           |
+              |    54 countries, 6 regions  |
               +----------------------------+
 ```
 
@@ -198,6 +226,14 @@ Chatbot (Planner):
   POST /api/v1/planner/reset           Reset a conversation session to the beginning
   GET  /api/v1/planner/session/{id}    Retrieve the current state of a session
 
+Package Finder (Recommendations):
+
+  POST /api/v1/recommendations/search        Filtered and scored package search
+  GET  /api/v1/recommendations/filters       Dynamic filter options from the database
+  GET  /api/v1/recommendations/locations      All cached locations for autosuggest
+  GET  /api/v1/recommendations/autosuggest    Live autosuggest (starts_with, includes, ends_with)
+  GET  /api/v1/recommendations/search-by-name  Search packages by name
+
 Packages:
 
   GET  /api/v1/packages/               List packages with pagination
@@ -290,6 +326,7 @@ Railbookerchatbot/
                 health.py               Health check and readiness probes
                 routes_planner.py       Chatbot conversation endpoints
                 routes_packages.py      Package CRUD endpoints
+                routes_recommendations.py  Package Finder search, filters, autosuggest
                 routes_i18n.py          Translation endpoints
             core/
                 config.py               Pydantic settings and environment variables
@@ -301,14 +338,16 @@ Railbookerchatbot/
                 models.py               ORM models (TravelPackage)
                 repositories.py         Data access layer
             ingestion/
-                cleaned_packages.json   Source package data (1,996 records)
+                cleaned_packages.json   Source package data (1,995 records)
             services/
                 db_options.py           Database-driven option lookups
-                recommender.py          Multi-factor scoring engine
+                recommendation_engine.py  Package Finder SQL engine with scoring
+                recommender.py          Chatbot multi-factor scoring engine
                 translations.py         Runtime translation service
                 vector_store.py         TF-IDF RAG vector store
         scripts/
             build_vectors.py            Build TF-IDF vectors from package data
+            create_indexes.py           Database index creation for performance
             seed_sqlite.py              Seed database from JSON source
             seed_rag_packages.py        RAG-specific data seeding
         tests/
@@ -320,7 +359,11 @@ Railbookerchatbot/
         requirements.txt                Python dependencies
     frontend/
         index.html                      Chat interface entry point
-        main.js                         Application controller
+        main.js                         Chat application controller
+        recommend.html                  Package Finder interface
+        recommend.js                    Package Finder controller (search, filters, cards)
+        detail.html                     Package detail and itinerary page
+        detail.js                       Detail page controller
         serve.py                        Static file server (development)
         components/
             ChatInput.js                Message input component
@@ -332,8 +375,11 @@ Railbookerchatbot/
             api.js                      API service layer with retry logic
         styles/
             premium-chat.css            Chat interface styles
+            recommend.css               Package Finder styles
+            detail.css                  Detail page styles
     doc/
         KT_Package_Filtering.sql        Reference SQL queries
+        PACKAGE_FINDER_SYSTEM_REPORT.md  System technical report
     .gitignore
     README.md
 ```

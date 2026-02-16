@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Railbookers - Package Itinerary Details">
+  <meta name="theme-color" content="#1a365d">
+  <title>Railbookers | Itinerary Details</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/detail.css?v=20260216f">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+</head>
+<body>
+
+  <!-- LOADING STATE -->
+  <div class="dt-loading" id="loading">
+    <div class="dt-spinner"></div>
+    <p>Loading itinerary...</p>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div class="dt-error" id="error-state" style="display:none;">
+    <h2>Package not found</h2>
+    <p>The requested package could not be loaded.</p>
+    <a href="recommend.html" class="dt-btn-back">Back to Search</a>
+  </div>
+
+  <!-- MAIN DETAIL CONTENT -->
+  <div id="detail-content" style="display:none;">
+
+    <!-- DARK BLUE HEADER BAR -->
+    <header class="dt-header">
+      <div class="dt-header-inner">
+        <a href="recommend.html" class="dt-back-arrow" title="Back to results">&#8592;</a>
+        <h1 class="dt-header-title" id="pkg-title">Package Name</h1>
+      </div>
+      <div class="dt-header-route" id="pkg-route-header"></div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <main class="dt-main">
+
+      <!-- SALES TIPS -->
+      <section class="dt-section dt-sales-tips-section" id="section-salestips" style="display:none;">
+        <h2 class="dt-section-title"><span class="dt-tips-icon">&#128483;&#65039;</span> Sales Tips</h2>
+        <div class="dt-tips-columns" id="pkg-salestips"></div>
+      </section>
+
+      <!-- SAVE PROMO BANNER -->
+      <section class="dt-promo-banner" id="promo-banner" style="display:none;">
+        <div class="dt-promo-left">
+          <div class="dt-promo-top">
+            <div class="dt-promo-badge">Save &pound;<span id="promo-amount">150</span></div>
+            <h3 class="dt-promo-title" id="promo-title"></h3>
+          </div>
+          <p class="dt-promo-desc" id="promo-desc"></p>
+        </div>
+        <div class="dt-promo-img" id="promo-img"></div>
+      </section>
+
+      <!-- DESCRIPTION -->
+      <section class="dt-section" id="section-description" style="display:none;">
+        <div class="dt-description-text" id="pkg-description"></div>
+      </section>
+
+      <!-- DAY BY DAY -->
+      <section class="dt-section" id="section-daybyday" style="display:none;">
+        <div class="dt-dbd-header">
+          <h2 class="dt-section-title dt-dbd-title">Day by Day</h2>
+          <button class="dt-dbd-toggle" id="dbd-toggle-all">OPEN ALL <span class="dt-dbd-chevron">&#9661;</span></button>
+        </div>
+        <div class="dt-dbd-legend">Legend for Meals: <strong>B</strong> - Breakfast, <strong>BR</strong> - Brunch, <strong>L</strong> - Lunch, <strong>D</strong> - Dinner</div>
+        <div class="dt-dbd-list" id="pkg-daybyday"></div>
+      </section>
+
+      <!-- TRIP HIGHLIGHTS -->
+      <section class="dt-section" id="section-highlights" style="display:none;">
+        <h2 class="dt-section-title">Trip Highlights</h2>
+        <ul class="dt-bullet-list" id="pkg-highlights"></ul>
+      </section>
+
+      <!-- WHAT'S INCLUDED -->
+      <section class="dt-section" id="section-inclusions" style="display:none;">
+        <h2 class="dt-section-title">What's Included</h2>
+        <ul class="dt-bullet-list dt-included-list" id="pkg-inclusions"></ul>
+      </section>
+
+      <!-- TRAINS -->
+      <section class="dt-section" id="section-trains" style="display:none;">
+        <h2 class="dt-section-title">Trains</h2>
+        <div class="dt-trains-wrapper">
+          <div class="dt-trains-grid" id="pkg-trains"></div>
+          <button class="dt-trains-scroll-btn" id="trains-scroll-btn" style="display:none;" onclick="document.getElementById('pkg-trains').scrollBy({left:220,behavior:'smooth'})">&rarr;</button>
+        </div>
+      </section>
+
+      <!-- DEPARTURE DATES -->
+      <section class="dt-section" id="section-departures" style="display:none;">
+        <h2 class="dt-section-title">Departure Dates</h2>
+        <div class="dt-departures-text" id="pkg-departures"></div>
+      </section>
+
+    </main>
+
+    <!-- STICKY BOTTOM BAR -->
+    <div class="dt-sticky-bar">
+      <div class="dt-sticky-price" id="sticky-price"></div>
+      <div class="dt-sticky-actions">
+        <button class="dt-btn-jump" onclick="document.getElementById('section-daybyday')?.scrollIntoView({behavior:'smooth'})">Jump to Itinerary</button>
+        <button class="dt-btn-dateprice" id="btn-dateprice">Date and Price <span class="dt-dp-chevron">&#9650;</span></button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="detail.js?v=20260216f"></script>
+</body>
+</html>

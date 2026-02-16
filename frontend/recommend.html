@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Railbookers - Find your perfect rail vacation. Search destinations, filter by region, trains, and vacation type.">
+  <meta name="theme-color" content="#1a365d">
+  <title>Railbookers | Package Finder</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/recommend.css?v=20260216n">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+</head>
+<body>
+
+  <!-- MAIN CONTENT — matches production Railbookers Agent Portal -->
+  <main class="rb-main">
+
+    <!-- ========== SEARCH AREA ========== -->
+    <section class="rb-search-area" id="search-area">
+
+      <!-- INSTRUCTION BANNER -->
+      <div class="rb-instruction-banner" id="instruction-banner">
+        <strong>Find a Tour.</strong> To get started, choose a package name, departure city, destination, or a stop along the way
+      </div>
+
+      <!-- SEARCH ROWS CONTAINER (rendered by JS) -->
+      <div class="rb-search-rows" id="search-rows"></div>
+
+      <!-- FILTER BAR -->
+      <div class="rb-filter-bar">
+        <div class="rb-results-count" id="results-count">
+          Viewing <strong id="total-display">--</strong> Results
+        </div>
+        <div class="rb-filter-pills" id="filter-pills">
+          <button class="rb-filter-pill" data-filter="region" id="pill-region">
+            <span class="rb-pill-label">Region</span>
+            <span class="rb-pill-count" id="pill-count-region"></span>
+          </button>
+          <button class="rb-filter-pill" data-filter="duration" id="pill-duration">
+            <span class="rb-pill-label">Trip Duration</span>
+            <span class="rb-pill-count" id="pill-count-duration"></span>
+          </button>
+          <button class="rb-filter-pill" data-filter="trains" id="pill-trains">
+            <span class="rb-pill-label">Trains</span>
+            <span class="rb-pill-count" id="pill-count-trains"></span>
+          </button>
+          <button class="rb-filter-pill" data-filter="vactype" id="pill-vactype">
+            <span class="rb-pill-label">Vacation Type</span>
+            <span class="rb-pill-count" id="pill-count-vactype"></span>
+          </button>
+        </div>
+        <div class="rb-sort-area">
+          <label for="sort-select" class="rb-sort-label">Sort by:</label>
+          <select id="sort-select" class="rb-sort-select">
+            <option value="popularity">Most Popular</option>
+            <option value="name_asc">A-Z</option>
+            <option value="name_desc">Z-A</option>
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price (low to high)</option>
+            <option value="price_desc">Price (high to low)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- FILTER POPUP PANELS -->
+      <div class="rb-filter-popups">
+        <!-- Region Filter Panel -->
+        <div class="rb-filter-panel" id="panel-region" style="display:none;">
+          <div class="rb-panel-top-bar">
+            <span class="rb-panel-title-inline">Region</span>
+            <button class="rb-panel-close" data-panel="region">&times; Close</button>
+          </div>
+          <div class="rb-panel-header">
+            <input type="text" class="rb-panel-search" id="region-search" placeholder="Search for a Region" autocomplete="off">
+          </div>
+          <div class="rb-panel-chips" id="region-chips"></div>
+          <div class="rb-panel-footer">
+            <div class="rb-panel-links">
+              <button class="rb-link-btn" id="region-reset">Reset</button>
+              <span class="rb-link-sep">|</span>
+              <button class="rb-link-btn" id="region-clear-all">Clear All Filters</button>
+            </div>
+            <button class="rb-panel-apply" id="region-apply">
+              Show <span id="region-result-count">--</span> Results &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Trip Duration Filter Panel -->
+        <div class="rb-filter-panel" id="panel-duration" style="display:none;">
+          <div class="rb-panel-top-bar">
+            <span class="rb-panel-title-inline">Trip Duration</span>
+            <button class="rb-panel-close" data-panel="duration">&times; Close</button>
+          </div>
+          <div class="rb-panel-header">
+            <span class="rb-panel-title">Select Duration Range</span>
+          </div>
+          <div class="rb-duration-slider-area">
+            <div class="rb-slider-labels">
+              <span class="rb-slider-val" id="dur-min-label">2 days</span>
+              <span class="rb-slider-val" id="dur-max-label">34 days</span>
+            </div>
+            <div class="rb-range-slider-track" id="slider-track">
+              <div class="rb-range-slider-fill" id="slider-fill"></div>
+              <input type="range" class="rb-range-input rb-range-min" id="dur-slider-min" min="2" max="34" value="2" step="1">
+              <input type="range" class="rb-range-input rb-range-max" id="dur-slider-max" min="2" max="34" value="34" step="1">
+            </div>
+            <div class="rb-slider-minmax">
+              <span>Minimum</span>
+              <span>Maximum</span>
+            </div>
+          </div>
+          <div class="rb-panel-footer">
+            <div class="rb-panel-links">
+              <button class="rb-link-btn" id="duration-reset">Reset</button>
+              <span class="rb-link-sep">|</span>
+              <button class="rb-link-btn" id="duration-clear-all">Clear All Filters</button>
+            </div>
+            <button class="rb-panel-apply" id="duration-apply">
+              Show <span id="duration-result-count">--</span> Results &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Trains Filter Panel -->
+        <div class="rb-filter-panel" id="panel-trains" style="display:none;">
+          <div class="rb-panel-top-bar">
+            <span class="rb-panel-title-inline">Trains</span>
+            <button class="rb-panel-close" data-panel="trains">&times; Close</button>
+          </div>
+          <div class="rb-panel-header">
+            <input type="text" class="rb-panel-search" id="trains-search" placeholder="Search for a Train" autocomplete="off">
+          </div>
+          <div class="rb-panel-chips" id="trains-chips"></div>
+          <div class="rb-panel-footer">
+            <div class="rb-panel-links">
+              <button class="rb-link-btn" id="trains-reset">Reset</button>
+              <span class="rb-link-sep">|</span>
+              <button class="rb-link-btn" id="trains-clear-all">Clear All Filters</button>
+            </div>
+            <button class="rb-panel-apply" id="trains-apply">
+              Show <span id="trains-result-count">--</span> Results &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Vacation Type Filter Panel -->
+        <div class="rb-filter-panel" id="panel-vactype" style="display:none;">
+          <div class="rb-panel-top-bar">
+            <span class="rb-panel-title-inline">Vacation Type</span>
+            <button class="rb-panel-close" data-panel="vactype">&times; Close</button>
+          </div>
+          <div class="rb-panel-header">
+            <input type="text" class="rb-panel-search" id="vactype-search" placeholder="Search for a Vacation Type" autocomplete="off">
+          </div>
+          <div class="rb-panel-chips" id="vactype-chips"></div>
+          <div class="rb-panel-footer">
+            <div class="rb-panel-links">
+              <button class="rb-link-btn" id="vactype-reset">Reset</button>
+              <span class="rb-link-sep">|</span>
+              <button class="rb-link-btn" id="vactype-clear-all">Clear All Filters</button>
+            </div>
+            <button class="rb-panel-apply" id="vactype-apply">
+              Show <span id="vactype-result-count">--</span> Results &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LOADING STATE ========== -->
+    <div class="rb-loading" id="loading" style="display:none;">
+      <div class="rb-spinner"></div>
+      <p>Searching packages...</p>
+    </div>
+
+    <!-- ========== RESULTS LIST ========== -->
+    <section class="rb-results-list" id="results-list" aria-live="polite" aria-label="Search results"></section>
+
+    <!-- ========== EMPTY STATE ========== -->
+    <div class="rb-empty-state" id="empty-state">
+      <div class="rb-empty-icon">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+      </div>
+      <h3>Search for your perfect rail vacation</h3>
+      <p>Add destinations above or use the filter buttons to explore <strong id="total-count-empty">--</strong> packages.</p>
+    </div>
+  </main>
+
+  <script src="recommend.js?v=20260216n"></script>
+</body>
+</html>

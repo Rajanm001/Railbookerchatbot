@@ -1,0 +1,504 @@
+/* Railbookers Detail Page – Production Match */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a202c;
+  background: #fff;
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ========== LOADING / ERROR ========== */
+.dt-loading { text-align: center; padding: 100px 20px; color: #8b95a1; }
+.dt-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid #e2e6ea; border-top-color: #1a365d;
+  border-radius: 50%; animation: dtspin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+@keyframes dtspin { to { transform: rotate(360deg); } }
+.dt-error { text-align: center; padding: 100px 20px; color: #6c757d; }
+.dt-error h2 { color: #2d3748; margin-bottom: 8px; }
+.dt-error p { margin-bottom: 20px; }
+.dt-btn-back {
+  display: inline-block; padding: 10px 24px;
+  background: #1a365d; color: #fff; border-radius: 6px;
+  text-decoration: none; font-weight: 600; font-size: 0.88rem;
+}
+.dt-btn-back:hover { background: #2c5282; }
+
+/* ========== DARK BLUE HEADER BAR ========== */
+.dt-header {
+  background: #1a365d;
+  padding: 20px 0 18px;
+  color: #fff;
+}
+.dt-header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.dt-back-arrow {
+  color: #fff;
+  font-size: 1.4rem;
+  text-decoration: none;
+  font-weight: 400;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.dt-back-arrow:hover { background: rgba(255,255,255,0.12); }
+.dt-header-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+}
+.dt-header-route {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 10px 28px 0 80px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dt-hdr-city {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #fff;
+}
+.dt-hdr-arrow {
+  color: #c8a951;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ========== MAIN BODY ========== */
+.dt-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 28px 100px;
+}
+
+/* ========== SECTIONS ========== */
+.dt-section {
+  background: #fff;
+  border: none;
+  border-bottom: 1px solid #e8e8e8;
+  border-radius: 0;
+  padding: 24px 0;
+  margin-bottom: 0;
+}
+.dt-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 16px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+/* ========== SALES TIPS ========== */
+.dt-sales-tips-section {
+  background: #f9fafb;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.dt-sales-tips-section .dt-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #1a202c;
+  margin-bottom: 12px;
+}
+.dt-tips-icon {
+  font-size: 1.2rem;
+}
+.dt-tips-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 32px;
+  font-size: 0.88rem;
+  color: #4a5568;
+  line-height: 1.6;
+}
+.dt-tip-item {
+  padding-left: 16px;
+  position: relative;
+}
+.dt-tip-item::before {
+  content: '\2022';
+  position: absolute;
+  left: 0;
+  color: #888;
+}
+
+/* ========== PROMO BANNER ========== */
+.dt-promo-banner {
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border: 1px solid #e8d48b;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.dt-promo-left {
+  flex: 1;
+  padding: 20px 24px;
+}
+.dt-promo-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.dt-promo-badge {
+  background: #c8a951;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 8px 24px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.dt-promo-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a202c;
+  line-height: 1.3;
+}
+.dt-promo-desc {
+  font-size: 0.88rem;
+  color: #4a5568;
+  line-height: 1.6;
+}
+.dt-promo-img {
+  width: 200px;
+  min-height: 130px;
+  background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 50%, #2d8f4e 100%);
+  flex-shrink: 0;
+}
+
+/* ========== DESCRIPTION ========== */
+.dt-description-text {
+  font-size: 0.9rem;
+  color: #4a5568;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+/* ========== DAY BY DAY ========== */
+.dt-dbd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.dt-dbd-title {
+  margin-bottom: 0 !important;
+}
+.dt-dbd-toggle {
+  background: none;
+  border: none;
+  color: #c8a951;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.dt-dbd-toggle:hover { color: #b89840; }
+.dt-dbd-chevron { font-size: 0.7rem; }
+
+.dt-dbd-legend {
+  font-size: 0.82rem;
+  color: #6c757d;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+.dt-dbd-legend strong {
+  font-weight: 700;
+  color: #333;
+}
+
+.dt-dbd-row {
+  border: none;
+  border-bottom: 1px solid #e8e8e8;
+  border-radius: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+.dt-dbd-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  background: #fff;
+  transition: background 0.15s;
+}
+.dt-dbd-row-header:hover { background: #f9fafb; }
+.dt-dbd-day-icon {
+  font-size: 1rem;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.dt-dbd-day-num {
+  display: inline;
+  width: auto;
+  height: auto;
+  background: none;
+  color: #1a202c;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border-radius: 0;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.dt-dbd-day-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a202c;
+  flex: 1;
+}
+.dt-dbd-expand-btn {
+  background: none;
+  border: none;
+  color: #c8a951;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.dt-dbd-expand-btn .dt-exp-chevron {
+  font-size: 0.65rem;
+  transition: transform 0.2s;
+}
+.dt-dbd-row.open .dt-dbd-expand-btn .dt-exp-chevron {
+  transform: rotate(180deg);
+}
+.dt-dbd-row-body {
+  display: none;
+  padding: 0 18px 16px 60px;
+  font-size: 0.88rem;
+  color: #4a5568;
+  line-height: 1.7;
+}
+.dt-dbd-row.open .dt-dbd-row-body { display: block; }
+.dt-dbd-row.open .dt-dbd-expand-btn { color: #b89840; }
+
+/* ========== BULLET LISTS (Highlights + Inclusions) ========== */
+.dt-bullet-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.dt-bullet-list li {
+  font-size: 0.88rem;
+  color: #4a5568;
+  padding-left: 18px;
+  position: relative;
+  line-height: 1.65;
+}
+.dt-bullet-list li::before {
+  content: '\2022';
+  position: absolute;
+  left: 0;
+  color: #1a365d;
+  font-size: 1rem;
+  font-weight: 700;
+  top: -1px;
+}
+.dt-included-list li::before {
+  content: '\2022';
+  color: #1a365d;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+/* ========== TRAINS ========== */
+.dt-trains-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dt-trains-grid {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  flex: 1;
+  padding-bottom: 8px;
+  scroll-behavior: smooth;
+}
+.dt-train-card {
+  min-width: 190px;
+  max-width: 220px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+.dt-train-card-img {
+  width: 100%;
+  height: 150px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.dt-train-card-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30px 14px 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(transparent, rgba(0,0,0,0.65));
+}
+.dt-train-card-desc {
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #4a5568;
+  line-height: 1.5;
+}
+.dt-trains-scroll-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #e8e8e8;
+  background: #fff;
+  color: #c8a951;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.dt-trains-scroll-btn:hover {
+  background: #fdf6e3;
+  border-color: #c8a951;
+}
+
+/* ========== DEPARTURES ========== */
+.dt-departures-text {
+  font-size: 0.88rem;
+  color: #4a5568;
+  line-height: 1.7;
+}
+
+/* ========== STICKY BOTTOM BAR ========== */
+.dt-sticky-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a365d;
+  color: #fff;
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+}
+.dt-sticky-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+.dt-sticky-price span {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.7);
+  display: block;
+  margin-bottom: 2px;
+}
+.dt-sticky-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dt-btn-jump {
+  background: #c8a951;
+  color: #1a202c;
+  border: none;
+  padding: 10px 22px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dt-btn-jump:hover { background: #b89840; }
+.dt-btn-dateprice {
+  background: #c8a951;
+  color: #1a202c;
+  border: none;
+  padding: 10px 22px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.dt-btn-dateprice:hover { background: #b89840; }
+.dt-dp-chevron { font-size: 0.65rem; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .dt-header-inner { padding: 0 16px; }
+  .dt-header-route { padding: 8px 16px 0 52px; }
+  .dt-main { padding: 16px 16px 100px; }
+  .dt-header-title { font-size: 1.1rem; }
+  .dt-tips-columns { grid-template-columns: 1fr; }
+  .dt-trains-grid { grid-template-columns: 1fr 1fr; }
+  .dt-sticky-bar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .dt-sticky-price { font-size: 1rem; }
+}
+
+@media print {
+  .dt-header, .dt-sticky-bar { display: none !important; }
+  .dt-section { break-inside: avoid; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
