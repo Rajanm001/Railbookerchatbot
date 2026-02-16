@@ -10,7 +10,7 @@ A full-stack conversational chatbot that helps travellers discover and book pers
 
 The Rail Vacation Planner is a production-grade chatbot that guides users through an 8-step conversational flow to recommend the best rail vacation packages from a curated database of **1,996 expert-designed packages** across **54 countries**.
 
-The system uses a hybrid recommendation engine combining SQL filtering with TF-IDF semantic search (RAG) to deliver highly relevant results. Every recommendation is sourced strictly from the Excel/database data — the system never hallucinates or fabricates package information.
+The system uses a hybrid recommendation engine combining SQL filtering with TF-IDF semantic search (RAG) to deliver highly relevant results. Every recommendation is sourced strictly from the Excel/database data.
 
 ### Key Highlights
 
@@ -18,11 +18,11 @@ The system uses a hybrid recommendation engine combining SQL filtering with TF-I
 - **8-step conversational flow** with natural language understanding
 - **10-language support**: English, French, Spanish, German, Italian, Chinese, Hindi, Japanese, Portuguese, Arabic
 - **Hybrid RAG engine**: TF-IDF vectors + SQL filtering + multi-signal scoring
-- **Zero hallucination**: all responses grounded in actual database records
+- **Database-driven**: all responses grounded in actual database records
 - **Free-text conversational input** at every step with inline hints
 - **Fuzzy destination matching** with region-aware alternatives for unavailable destinations
 - **Duplicate detection** to prevent .com/.co.uk variant packages from appearing twice
-- **356 automated tests** across 6 test suites — all passing
+- **356 automated tests** across 5 test suites
 
 ---
 
@@ -35,25 +35,33 @@ travel/
 │   │   ├── main.py                    # FastAPI application & middleware
 │   │   ├── core/
 │   │   │   ├── config.py              # Settings (env, CORS, rate limits)
-│   │   │   ├── models.py              # SQLAlchemy ORM (TravelPackage)
-│   │   │   └── guards.py              # Input sanitisation & safety guards
+│   │   │   ├── i18n.py                # Internationalisation utilities
+│   │   │   ├── monitoring.py          # Application monitoring
+│   │   │   └── rate_limiting.py       # Rate limiting configuration
 │   │   ├── api/
 │   │   │   ├── routes_planner.py      # 8-step chat endpoint & NL engine
 │   │   │   ├── routes_packages.py     # Package CRUD endpoints
 │   │   │   ├── routes_i18n.py         # Translation endpoints
 │   │   │   └── health.py              # Health & readiness probes
+│   │   ├── db/
+│   │   │   ├── database.py            # SQLAlchemy engine & session
+│   │   │   ├── models.py             # ORM models (TravelPackage)
+│   │   │   └── repositories.py        # Data access layer
 │   │   └── services/
 │   │       ├── recommender.py         # Hybrid recommendation engine
 │   │       ├── vector_store.py        # TF-IDF vector store (RAG)
 │   │       ├── translations.py        # i18n translations (10 languages)
 │   │       └── db_options.py          # Database option provider
 │   ├── tests/
-│   │   ├── test_production_ready.py   # 136 production tests
-│   │   ├── test_prd_deep_verify.py    # 146 PRD verification tests
-│   │   ├── test_e2e_production.py     #  64 end-to-end tests
-│   │   ├── test_enhancements.py       #  14 enhancement tests
-│   │   ├── test_features.py           #   8 feature tests
-│   │   └── test_rag_quality.py        #  10 RAG quality tests
+│   │   ├── test_production_ready.py   # Production readiness tests
+│   │   ├── test_prd_deep_verify.py    # PRD verification tests
+│   │   ├── test_e2e_production.py     # End-to-end tests
+│   │   ├── test_rag_quality.py        # RAG quality verification
+│   │   └── test_ultimate_production.py # Scale & data integrity tests
+│   ├── scripts/
+│   │   ├── build_vectors.py           # TF-IDF vector builder
+│   │   ├── seed_rag_packages.py       # Package data seeder
+│   │   └── seed_sqlite.py             # Database seeder
 │   ├── rail_planner.db                # SQLite database (1,996 packages)
 │   └── requirements.txt
 ├── frontend/
@@ -260,38 +268,34 @@ POST /api/v1/planner/chat
 
 ## Testing
 
-Run all 6 test suites (356 total tests):
+Run the test suites:
 
 ```bash
 cd backend
 
-# Production readiness (136 tests)
+# Production readiness
 python tests/test_production_ready.py
 
-# PRD deep verification (146 tests)
+# PRD deep verification
 python tests/test_prd_deep_verify.py
 
-# E2E production (64 tests)
+# E2E production
 python tests/test_e2e_production.py
 
-# Enhancement features (14 tests)
-python tests/test_enhancements.py
-
-# Feature tests (8 tests)
-python tests/test_features.py
-
-# RAG quality verification (10 tests)
+# RAG quality verification
 python tests/test_rag_quality.py
+
+# Scale & data integrity
+python tests/test_ultimate_production.py
 ```
 
 ### Test Coverage
 
-- **Production (136):** Full 8-step flow, multi-country selection, multi-language flows, autocomplete, edge cases, error handling, recommendation quality, duplicate prevention
-- **PRD Deep Verify (146):** Database integrity vs Excel, RAG pipeline, 8-step flow, recommendation quality, scoring, edge cases, API consistency, performance
-- **E2E Production (64):** Root, health, headers, planner, RAG, DB options, packages, search, i18n, full flow, session, frontend, performance
-- **Enhancements (14):** Calendar date parsing, traveller NL parsing, reset functionality
-- **Features (8):** Multilingual flows (Hindi, German, Spanish, etc.), end-to-end conversation
-- **RAG Quality (10):** Italy romance, USA adventure, family Europe, solo UK, Canada luxury, India budget, surprise-me, multi-country, NL input, French language
+- **Production Ready:** Full 8-step flow, multi-country selection, multi-language flows, autocomplete, edge cases, error handling, recommendation quality, duplicate prevention
+- **PRD Deep Verify:** Database integrity vs Excel, RAG pipeline, 8-step flow, recommendation quality, scoring, edge cases, API consistency, performance
+- **E2E Production:** Root, health, headers, planner, RAG, DB options, packages, search, i18n, full flow, session, frontend, performance
+- **RAG Quality:** Italy romance, USA adventure, family Europe, solo UK, Canada luxury, India budget, surprise-me, multi-country, NL input, French language
+- **Scale & Data Integrity:** Concurrency, edge cases, data verification, security, error handling, schema consistency
 
 ---
 
@@ -325,7 +329,7 @@ Key settings in `app/core/config.py`:
 
 All features complete and tested. Production-ready for deployment.
 
-- 356/356 tests passing
+- All test suites passing
 - 0 linting errors
 - Full 8-step conversational flow working
 - 10-language support active

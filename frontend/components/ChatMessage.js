@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ChatMessage Component - Railbookers
  * Message rendering component.
  * Clean, professional, accessible. No emojis.
@@ -88,7 +88,7 @@ export class ChatMessage {
         ? rec.highlights.replace(/<[^>]*>/g, '').substring(0, 100)
         : '';
       const urlBtn = rec.package_url
-        ? `<a href="${rec.package_url}" target="_blank" rel="noopener noreferrer" class="rec-view-btn" onclick="event.stopPropagation()">View Details</a>`
+        ? `<a href="${rec.package_url}" target="_blank" rel="noopener noreferrer" class="rec-view-btn" onclick="event.stopPropagation()">View Details</a><a href="${rec.package_url}" target="_blank" rel="noopener noreferrer" class="rec-book-btn" onclick="event.stopPropagation()">Book Now</a>`
         : '';
 
       const scoreClass = score >= 70 ? 'score-high' : score >= 40 ? 'score-mid' : 'score-low';
@@ -162,9 +162,9 @@ export class ChatMessage {
 
     return `
       <div class="recommendation-section">
-        <div class="rec-section-header">Your Top Matches</div>
+        <div class="rec-section-header">Your Curated Matches</div>
         <div class="recommendation-cards">${cards}</div>
-        <div class="rec-footer-note">Every journey is fully customisable. Select a package for details or speak with our travel advisors.</div>
+        <div class="rec-footer-note">Every journey is fully customisable. Select a package for details or speak with our expert advisors.</div>
       </div>`;
   }
 

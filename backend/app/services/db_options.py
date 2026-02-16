@@ -1,7 +1,7 @@
 """
 DB-Driven Options Provider
 ALL chatbot options come from the database rag_packages table.
-Zero hardcoded values. Zero hallucination. Zero demo data.
+All values sourced from the database.
 
 PERFORMANCE: Uses in-memory TTL cache (5 min) to avoid hitting DB
 on every request. Options change rarely; cache is auto-refreshed.
@@ -85,7 +85,7 @@ class DBOptionsProvider:
     Every value shown to the user MUST originate from this class.
     Uses TTL cache for speed -- DB queried at most once per 5 minutes.
 
-    If `db` is None, returns empty lists. NO demo fallback. NO hardcoded data.
+    If `db` is None, returns empty lists. All data from the database.
     """
 
     def __init__(self, db: Optional[Session] = None):
@@ -317,6 +317,7 @@ class DBOptionsProvider:
 
         matched_countries: list = []
         matched_cities: list = []
+        consumed = set()  # Character positions consumed (shared across passes)
 
         input_lower = cleaned.lower()
 
@@ -333,6 +334,10 @@ class DBOptionsProvider:
                     if before_ok and after_ok:
                         if db_name not in matched_countries:
                             matched_countries.append(db_name)
+                        # Mark alias chars as consumed so they are not
+                        # reported as unmatched later.
+                        for pos in range(idx, end_idx):
+                            consumed.add(pos)
 
         # ---- PASS 1: Scan for known multi-word names (longest first) ----
         # This catches "New York City", "Czech Republic", "South Africa", etc.
@@ -348,7 +353,7 @@ class DBOptionsProvider:
         all_names.sort(key=lambda x: len(x[0]), reverse=True)
 
         # Track which parts of the input have been consumed
-        consumed = set()  # Character positions consumed
+        # (consumed set initialised before Pass 0)
 
         for name_lower, name_orig, name_type in all_names:
             if len(name_lower) < 3:
@@ -384,6 +389,8 @@ class DBOptionsProvider:
                 start = end_idx
 
         # ---- PASS 2: Tokenize unconsumed text for partial matches ----
+        unmatched_tokens: list = []
+
         if not matched_countries and not matched_cities:
             # Nothing found in pass 1 — try tokenizing and partial matching
             tokens = re.split(r"[,;&]+|\band\b", cleaned, flags=re.IGNORECASE)
@@ -393,23 +400,56 @@ class DBOptionsProvider:
                 tl = token.lower().strip()
                 if len(tl) < 2:
                     continue
+                found = False
                 # Partial match country
                 for key, val in db_countries.items():
                     if tl in key or key in tl:
                         matched_countries.append(val)
+                        found = True
                         break
-                else:
+                if not found:
                     # Partial match city
                     for key, val in db_cities_full.items():
                         if tl in key or key in tl:
                             matched_cities.append(val)
+                            found = True
                             break
+                if not found and len(tl) >= 3:
+                    unmatched_tokens.append(token.strip())
+        else:
+            # Pass 1 found matches — extract unconsumed tokens to report
+            # unmatched place-name fragments back to the caller.
+            _stop_words = {
+                "i", "me", "my", "we", "us", "the", "a", "an", "to", "in",
+                "for", "of", "on", "at", "is", "it", "am", "are", "and",
+                "or", "but", "with", "from", "by", "up", "about", "into",
+                "want", "like", "love", "looking", "trip", "travel",
+                "going", "go", "please", "can", "you", "find", "show",
+                "take", "explore", "visit", "see", "also", "maybe",
+                "would", "could", "should", "that", "this", "some",
+                "have", "has", "had", "do", "does", "did", "will",
+                "been", "being", "was", "were", "be",
+            }
+            # Build string of unconsumed characters
+            unconsumed_chars = []
+            for i, ch in enumerate(input_lower):
+                if i not in consumed:
+                    unconsumed_chars.append(ch)
+                else:
+                    unconsumed_chars.append(" ")
+            unconsumed_text = "".join(unconsumed_chars)
+            fragments = re.split(r"[,;&\s]+|\band\b", unconsumed_text, flags=re.IGNORECASE)
+            for frag in fragments:
+                frag_clean = frag.strip()
+                if len(frag_clean) >= 3 and frag_clean.lower() not in _stop_words:
+                    # Capitalise for display
+                    unmatched_tokens.append(frag_clean.title())
 
         # Deduplicate while preserving order
         return {
             "matched_countries": list(dict.fromkeys(matched_countries)),
             "matched_cities": list(dict.fromkeys(matched_cities)),
-            "unmatched": [],
+            "unmatched": list(dict.fromkeys(unmatched_tokens)),
         }
 
     # ------------------------------------------------------------------
@@ -549,10 +589,16 @@ class DBOptionsProvider:
         try:
             rows = self.db.execute(
                 text("SELECT DISTINCT duration FROM rag_packages "
-                     "WHERE duration IS NOT NULL AND duration != '' "
-                     "ORDER BY CAST(duration AS INTEGER)")
+                     "WHERE duration IS NOT NULL AND duration != ''")
             ).fetchall()
-            result = [r[0] for r in rows if r[0]]
+            raw = [r[0] for r in rows if r[0]]
+            # Sort numerically (safe for PostgreSQL: no CAST in ORDER BY with DISTINCT)
+            def _dur_key(v):
+                try:
+                    return int(v)
+                except (ValueError, TypeError):
+                    return 9999
+            result = sorted(raw, key=_dur_key)
             return _set_cache("durations", result)
         except Exception as e:
             logger.error(f"get_durations error: {e}")
@@ -568,6 +614,11 @@ class DBOptionsProvider:
         if not self.db:
             return 0
         try:
+            # Rollback any aborted transaction before querying
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
             r = self.db.execute(text("SELECT COUNT(*) FROM rag_packages"))
             count = r.scalar() or 0
             return _set_cache("pkg_count", count)

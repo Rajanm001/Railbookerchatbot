@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Railbookers - Rail Vacation Planner
  * Design system for Railbookers chatbot.
  * Brand: Navy Blue (#1a365d), Gold (#f6c244), White (#ffffff)
@@ -199,6 +199,13 @@ button {
   text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
+.brand-reg {
+  font-size: 0.6em;
+  vertical-align: super;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
 .brand-tagline {
   font-size: 0.78rem;
   font-weight: 500;
@@ -213,6 +220,21 @@ button {
   align-items: center;
   gap: 0.5rem;
   z-index: 1;
+}
+.header-finder-link {
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.12);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.header-finder-link:hover {
+  background: rgba(255,255,255,0.2);
+  color: white;
 }
 
 /* ============================================================================
@@ -1531,3 +1553,172 @@ a:focus-visible {
 /* ============================================================
    AUTOCOMPLETE DROPDOWN - removed (clean input only)
    ============================================================ */
+
+/* ========================================================================
+   NEW MULTISELECT — clean chip selector (no confirm button)
+   ======================================================================== */
+
+.multi-select {
+  margin-top: 1rem;
+  animation: fadeSlideIn 400ms ease-out both;
+}
+
+.ms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.ms-hint {
+  font-size: 0.75rem;
+  color: var(--rb-gray-500);
+  font-weight: 500;
+}
+
+.ms-count {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--rb-blue);
+  background: var(--rb-blue-50);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.ms-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.ms-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--rb-gray-700);
+  background: var(--rb-gray-50);
+  border: 1.5px solid var(--rb-gray-200);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 180ms ease;
+  user-select: none;
+}
+
+.ms-chip:hover {
+  background: var(--rb-blue-50);
+  border-color: var(--rb-blue);
+  color: var(--rb-blue);
+  transform: translateY(-1px);
+}
+
+.ms-chip.selected {
+  background: var(--rb-blue);
+  border-color: var(--rb-blue);
+  color: white;
+  box-shadow: 0 2px 8px rgba(26,54,93,0.2);
+}
+
+.ms-chip.selected:hover {
+  background: var(--rb-blue-dark);
+  border-color: var(--rb-blue-dark);
+  color: white;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================================================
+   BOOK NOW BUTTON - Professional yellow CTA
+   ======================================================================== */
+
+.rec-book-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, var(--rb-yellow), #e5a30d);
+  color: var(--rb-blue-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--radius);
+  transition: all 200ms ease;
+  box-shadow: 0 3px 10px rgba(245, 183, 0, 0.3);
+}
+
+.rec-book-btn:hover {
+  background: linear-gradient(135deg, #e5a30d, var(--rb-yellow));
+  transform: translateY(-2px);
+  box-shadow: 0 5px 16px rgba(245, 183, 0, 0.4);
+}
+
+.rec-book-btn:active {
+  transform: translateY(0);
+}
+
+.rec-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ========================================================================
+   DESTINATION MULTI-SELECT CHIPS
+   ======================================================================== */
+
+.dest-select {
+  margin-top: 1rem;
+  animation: fadeSlideIn 400ms ease-out both;
+}
+
+.dest-header {
+  display: none;
+}
+
+.dest-count {
+  display: none;
+}
+
+.dest-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dest-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--rb-gray-700);
+  background: var(--rb-white);
+  border: 1.5px solid var(--rb-gray-200);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.dest-chip:hover {
+  background: var(--rb-blue-50);
+  border-color: var(--rb-blue);
+  color: var(--rb-blue);
+}
+
+.dest-chip.selected {
+  background: var(--rb-blue);
+  border-color: var(--rb-blue);
+  color: white;
+  box-shadow: 0 2px 6px rgba(26,54,93,0.2);
+}

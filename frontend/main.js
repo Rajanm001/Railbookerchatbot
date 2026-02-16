@@ -11,6 +11,7 @@ import { ChatMessage } from './components/ChatMessage.js';
 import { ChatInput } from './components/ChatInput.js';
 import { DatePicker } from './components/DatePicker.js';
 import { LanguageSwitcher } from './components/LanguageSwitcher.js';
+import { MultiSelect } from './components/MultiSelect.js';
 
 class RailbookersApp {
   constructor() {
@@ -158,7 +159,6 @@ class RailbookersApp {
       localStorage.removeItem('rb_step');
     } catch { /* localStorage unavailable */ }
   }
-
   async showWelcome() {
     let packageCount = 0;
     let countries = [];
@@ -173,25 +173,56 @@ class RailbookersApp {
       }
     } catch (_) { /* fallback */ }
 
-    const countText = packageCount > 0
-      ? packageCount.toLocaleString()
-      : 'thousands of';
+    const countText = packageCount > 0 ? packageCount.toLocaleString() : 'thousands of';
 
     const welcomeMsg = {
       role: 'assistant',
-      content:
-        `Welcome to **Railbookers**. I will find your perfect rail vacation from **${countText} curated packages** across 50+ countries.\n\n` +
-        `**Where would you like to go?**\n` +
-        `Type a country, city, or region below.`,
+      content: `Welcome to **Railbookers**. I have **${countText} packages** for you.\n\n**Where would you like to go?**\nSelect destinations below or type your own.`,
       timestamp: new Date(),
       actions: null,
     };
-    this.addMessage(welcomeMsg);
+    const welcomeEl = this.addMessage(welcomeMsg);
 
-    // Set autocomplete step context
+    // Multi-select chips for destinations
+    if (countries.length > 0) {
+      const chipsHtml = countries.slice(0, 15).map(c => 
+        `<button class="dest-chip" data-value="${c}">${c}</button>`
+      ).join('');
+      const widgetHtml = `
+        <div class="dest-select">
+          <div class="dest-chips">${chipsHtml}</div>
+        </div>`;
+      welcomeEl.querySelector('.message-content').insertAdjacentHTML('beforeend', widgetHtml);
+
+      const selected = new Set();
+      const chips = welcomeEl.querySelectorAll('.dest-chip');
+      const inputEl = document.querySelector('#chat-textarea');
+      const sendBtn = document.querySelector('#send-button');
+
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          const val = chip.dataset.value;
+          if (selected.has(val)) {
+            selected.delete(val);
+            chip.classList.remove('selected');
+          } else if (selected.size < 4) {
+            selected.add(val);
+            chip.classList.add('selected');
+          }
+          const text = Array.from(selected).join(', ');
+          if (inputEl) {
+            inputEl.value = text;
+            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (sendBtn) sendBtn.disabled = !text;
+        });
+      });
+    }
+
     this.input.setStep('destination');
-    this.updatePlaceholder('e.g. Italy, Swiss Alps, Tokyo...');
+    this.updatePlaceholder('Type destinations or select above...');
   }
+
 
   updatePlaceholder(text) {
     const input = document.querySelector('#chat-input .chat-input') || document.querySelector('#chat-textarea');

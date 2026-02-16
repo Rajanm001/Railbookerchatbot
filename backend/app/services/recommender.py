@@ -1,7 +1,7 @@
 """
 Package Recommendation Engine
 Combines TF-IDF vector search with structured SQL filtering
-and multi-factor scoring. Zero hallucination -- all data from database.
+and multi-factor scoring. All data sourced from the database.
 
 Architecture:
   1. RAG Retrieval: Use TF-IDF vectors to find semantically relevant packages
@@ -126,7 +126,9 @@ class PackageRecommender:
                     logger.warning(f"RAG retrieval failed, falling back to SQL: {e}")
 
             # ---- STEP 2: SQL FILTERING ----
-            query = self.db.query(TravelPackage)
+            query = self.db.query(TravelPackage).filter(
+                ~TravelPackage.external_name.ilike('%TEST%')
+            )
 
             # LOCATION FILTER
             loc_conditions = []
@@ -184,11 +186,18 @@ class PackageRecommender:
                 candidates = query3.limit(200).all()
                 logger.info(f"Fallback-2 (location only) returned {len(candidates)} candidates")
 
-            if not candidates:
+            # If primary location filters found nothing, do NOT return
+            # random top-ranked packages.  That would be hallucination.
+            if not candidates and loc_conditions:
+                logger.info("No packages match the requested destinations -- returning empty")
+                return []
+
+            if not candidates and not loc_conditions:
+                # Only fall back to top-ranked when NO location was specified
                 candidates = self.db.query(TravelPackage).order_by(
                     TravelPackage.package_rank.asc()
                 ).limit(50).all()
-                logger.info(f"Fallback-3 (top ranked) returned {len(candidates)} candidates")
+                logger.info(f"Fallback-3 (top ranked, no location filter) returned {len(candidates)} candidates")
 
             # ---- STEP 2b: Ensure destination packages are always represented ----
             # When trip-type filters are restrictive, destination-only results may
@@ -235,6 +244,67 @@ class PackageRecommender:
                 if name not in seen_names:
                     seen_names[name] = True
                     deduped.append((pkg, score, reasons))
+
+            # ---- Multi-destination fairness ----
+            # When user requests 2+ destinations, guarantee at least 1 result per
+            # destination (if packages exist), so no destination is drowned out.
+            if countries and len(countries) >= 2:
+                final: List[Tuple[TravelPackage, float, List[str]]] = []
+                used_names: set = set()
+                remaining_slots = top_k
+
+                # First pass: pick the best package for each destination
+                for dest in countries:
+                    dest_lower = dest.lower()
+                    for pkg, score, reasons in deduped:
+                        name = _s(pkg.external_name).strip().lower()
+                        if name in used_names:
+                            continue
+                        pkg_countries = _s(pkg.included_countries).lower()
+                        if dest_lower in pkg_countries:
+                            final.append((pkg, score, reasons))
+                            used_names.add(name)
+                            remaining_slots -= 1
+                            break
+
+                # If a destination had no packages in the deduped pool, try a
+                # relaxed DB query (location-only, no trip-type / hotel filter)
+                for dest in countries:
+                    dest_lower = dest.lower()
+                    already_covered = any(
+                        dest_lower in _s(pkg.included_countries).lower()
+                        for pkg, _, _ in final
+                    )
+                    if not already_covered and remaining_slots > 0:
+                        extra_pkgs = self.db.query(TravelPackage).filter(
+                            func.lower(TravelPackage.included_countries).contains(dest_lower)
+                        ).order_by(TravelPackage.package_rank.asc()).limit(5).all()
+                        for epkg in extra_pkgs:
+                            ename = _s(epkg.external_name).strip().lower()
+                            if ename not in used_names:
+                                escore, ereasons = self._score(
+                                    epkg, countries, cities, travel_dates,
+                                    trip_types, hotel_tier, duration_days,
+                                    rail_experience, rag_scores, budget,
+                                )
+                                final.append((epkg, escore, ereasons))
+                                used_names.add(ename)
+                                remaining_slots -= 1
+                                break
+
+                # Second pass: fill remaining slots from top deduped results
+                for pkg, score, reasons in deduped:
+                    if remaining_slots <= 0:
+                        break
+                    name = _s(pkg.external_name).strip().lower()
+                    if name not in used_names:
+                        final.append((pkg, score, reasons))
+                        used_names.add(name)
+                        remaining_slots -= 1
+
+                # Re-sort by score so best matches appear first
+                final.sort(key=lambda x: x[1], reverse=True)
+                deduped = final
 
             results = [self._format(pkg, score, reasons) for pkg, score, reasons in deduped[:top_k]]
 

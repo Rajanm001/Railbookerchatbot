@@ -2,7 +2,7 @@
  * DatePicker - Railbookers
  * Compact date-range calendar. User selects FROM date and TO date.
  * Highlights the range between start and end.
- * Auto-calculates nights. Flexible toggle. Confirm button.
+ * Auto-calculates nights. Confirm button.
  * Google Calendar-style mini grid. Max-width 340px.
  */
 
@@ -28,11 +28,6 @@ export class DatePicker {
           <span class="cal-range-nights" id="cal-nights-text"></span>
         </div>
         <div class="cal-options">
-          <label class="cal-flex-label">
-            <input type="checkbox" id="cal-flex-cb" class="cal-flex-hidden">
-            <span class="cal-toggle"><span class="cal-toggle-dot"></span></span>
-            Flexible
-          </label>
           <button class="cal-confirm" id="cal-confirm" disabled>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             Confirm
@@ -246,8 +241,8 @@ export class DatePicker {
       confirmBtn.onclick = () => {
         if (!startDate || !endDate) return;
         const nights = daysBetween(startDate, endDate);
-        const flex = (w.querySelector('#cal-flex-cb') || {}).checked || false;
-        const msg = `${startDate.day} ${MO_FULL[startDate.month]} ${startDate.year} to ${endDate.day} ${MO_FULL[endDate.month]} ${endDate.year}, ${nights} nights${flex ? ', flexible dates' : ''}`;
+        const flex = false;
+        const msg = `${startDate.day} ${MO_FULL[startDate.month]} ${startDate.year} to ${endDate.day} ${MO_FULL[endDate.month]} ${endDate.year}, ${nights} nights`;
         w.classList.add('cal-done');
         w.querySelectorAll('button, select, input').forEach(el => el.disabled = true);
         if (onConfirm) onConfirm(msg);

@@ -36,3 +36,18 @@ Thumbs.db
 
 # Logs
 *.log
+
+# PostgreSQL local data and binaries
+pgdata/
+pgsql/
+
+# Test output files
+*.txt
+!requirements.txt
+
+# Backup files
+*.bak
+
+# Migration/debug scripts (root level)
+migrate_sqlite_to_postgres.py
+cleanup_test_packages.py

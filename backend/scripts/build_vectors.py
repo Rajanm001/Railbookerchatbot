@@ -15,7 +15,8 @@ import os
 import time
 
 # Add backend to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _BACKEND_DIR)
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker

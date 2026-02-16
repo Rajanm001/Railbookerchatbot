@@ -20,7 +20,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.rate_limiting import limiter, rate_limit_handler
 from app.db.database import init_db
-from app.api import health, routes_packages, routes_planner, routes_i18n
+from app.api import health, routes_packages, routes_planner, routes_i18n, routes_recommendations
 
 # Configure logging
 logging_config = {
@@ -108,12 +108,12 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"Cache warming skipped: {e}")
     except Exception as e:
-        # If configured to enforce real data, abort startup rather than running in demo mode
+        # If configured to enforce real data, abort startup rather than running in degraded mode
         if settings.enforce_real_data:
             logger.error(f"Database init failed after 3 attempts and enforce_real_data=True, aborting startup: {e}")
             raise RuntimeError(f"Database init failed: {e}")
         # Otherwise allow graceful fallback (legacy behaviour)
-        logger.warning(f"Database init failed after 3 attempts, running in demo mode: {e}")
+        logger.warning(f"Database init failed after 3 attempts, running in degraded mode: {e}")
         # Mark DB as unavailable so get_db() yields None instantly
         from app.db.database import _db_available
         import app.db.database as _db_mod
@@ -227,6 +227,7 @@ app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(routes_packages.router, prefix=settings.api_prefix)
 app.include_router(routes_planner.router, prefix=settings.api_prefix)
 app.include_router(routes_i18n.router, prefix=settings.api_prefix)
+app.include_router(routes_recommendations.router, prefix=settings.api_prefix)
 
 
 # Root endpoint

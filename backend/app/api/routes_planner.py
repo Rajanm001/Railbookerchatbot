@@ -198,27 +198,27 @@ def _parse_traveler_count(text: str) -> tuple:
         else:
             n = max(count, 3)
         return ("family", n, f"family of {n}",
-                f"Family of {n} -- I will focus on family-friendly rail journeys with something for everyone.")
+                f"Family of {n} -- I will prioritise family-friendly journeys with the best experiences for all ages.")
     if has_couple:
         return ("couple", max(count, 2), "2 travellers",
-                "A trip for two -- I will find perfect couples packages.")
+                "A journey for two -- noted.")
     if "friend" in t or "group" in t or "colleague" in t or "business" in t or count > 4:
         n = max(count, 3)
         return ("friends", n, f"group of {n}",
-                f"Group of {n} -- rail travel is even better shared with great company.")
+                f"Group of {n} -- I will find itineraries that work perfectly for your group.")
     if "solo" in t or "alone" in t or "just me" in t or ("myself" in t and "and" not in t) or "on my own" in t or count == 1:
         return ("solo", 1, "solo traveller",
-                "Solo adventure -- the best way to travel at your own pace and discover hidden gems.")
+                "Solo journey -- I will find routes ideal for independent travellers.")
     if "parent" in t or "mom" in t or "dad" in t or "mum" in t or "father" in t or "mother" in t:
         n = max(count, 2)
         return ("family", n, f"family of {n}",
-                f"Family of {n} -- I will focus on family-friendly rail journeys with something for everyone.")
+                f"Family of {n} -- I will match family-friendly journeys.")
     if count == 2:
         return ("couple", 2, "2 travellers",
-                "A trip for two -- wonderful choice.")
+                "A journey for two -- wonderful.")
 
     return ("couple", max(count, 2), f"{max(count, 2)} travellers",
-            "Noted -- let me find the right fit.")
+            "Noted.")
 
 
 def _parse_duration(text: str) -> Optional[int]:
@@ -573,11 +573,7 @@ async def chat_with_planner(
         session["_ts"] = time.time()
         session["step"] = 1
         return ChatResponse(
-            message=(
-                "No problem -- let us refine your search.\n\n"
-                "**Where would you like to go?**\n"
-                "Type a country, city, or region below."
-            ),
+            message="No problem. Let us refine your preferences.\n\n**Where would you like to go?**",
             suggestions=None,
             step_number=1,
             needs_input=True,
@@ -587,11 +583,7 @@ async def chat_with_planner(
     ADVISOR_CMDS = {"speak with an advisor", "speak with advisor", "advisor", "parler à un conseiller", "hablar con un asesor", "mit einem berater sprechen", "parla con un consulente", "与顾问交谈", "सलाहकार से बात करें"}
     if user_lower in ADVISOR_CMDS:
         return ChatResponse(
-            message=(
-                "I would be happy to connect you with a Railbookers travel advisor.\n\n"
-                "Visit **railbookers.com** or call our team directly for a personalised consultation.\n\n"
-                "They specialise in bespoke itineraries, group bookings, and special arrangements."
-            ),
+            message="Our travel advisors would love to help. Visit **railbookers.com** or call our expert team for a personalised consultation.",
             suggestions=["Plan another trip"],
             step_number=0,
             needs_input=True,
@@ -604,11 +596,7 @@ async def chat_with_planner(
         session["_ts"] = time.time()
         session["step"] = 1
         return ChatResponse(
-            message=(
-                "Let us plan your next adventure.\n\n"
-                "**Where would you like to go?**\n"
-                "Type a country, city, or region below."
-            ),
+            message="Ready for your next adventure.\n\n**Where would you like to go?**",
             suggestions=None,
             step_number=1,
             needs_input=True,
@@ -627,39 +615,31 @@ async def chat_with_planner(
             session["data"]["destinations_countries"] = []
             session["data"]["destinations_cities"] = []
         step_prompts = {
-            1: ("No problem -- let us revisit your destination.\n\n"
-                "**Where would you like to go?**\n"
-                "Type a country, city, or region below.",
+            1: ("No problem. Let us revisit your destination.\n\n**Where would you like to go?**",
                 None,
                 "e.g. Italy, Swiss Alps, Tokyo..."),
-            2: ("Let us adjust the travellers.\n\n"
-                "Who will be travelling with you, and how many guests in total?\n"
-                "For example: couple, 2 adults and 2 children, solo, group of 6.",
+            2: ("Let us revisit who is travelling.\n\n"
+                "**Solo** | **Couple** | **Family** | **Friends** | **Colleagues**",
                 None, "e.g. Couple, Family of 4, Solo..."),
-            3: ("Let us change your travel dates.\n\n"
-                "When would you like to travel, and for how long?\n"
-                "Use the calendar below or type something like 'June 2026, 10 days'.",
+            3: ("Let us revisit your travel dates.\n\nWhen and for how long?\n\n"
+                "e.g. *June 2026, 10 days* | *Spring, 2 weeks* | *Flexible*",
                 None, "e.g. June 2026, 10 days..."),
-            4: ("Let us revisit the trip purpose.\n\n"
-                "What is the main reason for this trip?\n"
-                "(e.g. Culture and heritage, Adventure, Scenic sightseeing, Romance)",
-                None, "e.g. Cultural discovery, Romance, Adventure..."),
+            4: ("Let us revisit the experience type.\n\n"
+                "**Culture** | **Adventure** | **Scenic** | **Romance** | **Relaxation** | **Family** | **Luxury**",
+                None, "e.g. Culture, Adventure, Romance..."),
             5: ("Let us revisit the occasion.\n\n"
-                "Are you celebrating a special occasion?\n"
-                "(e.g. Birthday, Anniversary, Honeymoon, Graduation, or just for fun)",
-                ["No special occasion"], "e.g. Anniversary, Honeymoon..."),
-            6: ("Let us change your hotel preference.\n\n"
-                "What type of hotels do you prefer?\n\n"
-                "  - Luxury -- Five-star\n  - Premium -- Upscale\n  - Value -- Comfortable",
-                provider.get_hotel_tiers() if provider else ["Luxury", "Premium", "Value"],
-                "e.g. Luxury, Premium, Value..."),
-            7: ("Let us revisit your rail experience.\n\n"
-                "Have you taken a rail vacation before, or would this be your first time?",
+                "**Anniversary** | **Honeymoon** | **Birthday** | **Retirement** | **Just for fun**",
+                None, "e.g. Anniversary, No special occasion..."),
+            6: ("Let us revisit accommodation.\n\n"
+                "**Luxury** (5-star) | **Premium** (4-star) | **Value** (comfortable)",
+                None, "e.g. Luxury, Premium, Value..."),
+            7: ("Let us revisit rail experience.\n\n"
+                "**First time** | **A few trips** | **Seasoned traveller**",
                 None, "e.g. First time, Experienced..."),
-            8: ("Let us revisit your budget.\n\n"
-                "Do you have a budget per person, or shall I search across all price ranges?",
-                ["Find my perfect trips", "No budget limit"],
-                "e.g. $5000, No limit..."),
+            8: ("Let us revisit budget.\n\nAny budget per person or special requirements?\n\n"
+                "e.g. *\u00a35,000*, *No limit* -- or say **Find my trips**",
+                None,
+                "e.g. \u00a35,000, No limit, Find my trips..."),
         }
         prompt, suggs, ph = step_prompts.get(prev_step, step_prompts[1])
         return ChatResponse(
@@ -680,7 +660,7 @@ async def chat_with_planner(
             session["step"] = 1
             top_countries = provider.get_countries()[:15] if provider else []
             return ChatResponse(
-                message=t("welcome", lang),
+                message=t("welcome", lang, pkg_count=pkg_count),
                 suggestions=None,
                 step_number=1,
                 needs_input=True,
@@ -737,8 +717,7 @@ async def chat_with_planner(
             session["step"] = 2
             return ChatResponse(
                 message=(
-                    f"I love the spontaneity. Searching all **{pkg_count:,} packages** "
-                    "across 50+ countries for the perfect match.\n\n"
+                    f"Love the spontaneity. I will search all **{pkg_count:,} packages** across 50+ countries to find your ideal match.\n\n"
                     f"{t('q_travellers', lang)}"
                 ),
                 suggestions=None,
@@ -784,12 +763,12 @@ async def chat_with_planner(
                     if query_lower in _KNOWN_UNAVAILABLE:
                         # Recognised destination but no packages
                         not_found_msg = (
-                            f'We currently do not have rail packages for "{user_msg}", '
-                            "but our collection is always growing.\n\n"
+                            f'We do not currently have rail packages for "{user_msg}", '
+                            "but our collection is expanding.\n\n"
                         )
                     else:
                         not_found_msg = (
-                            f'No packages matched "{user_msg}" in our destinations.\n\n'
+                            f'No packages matched "{user_msg}" in our current catalogue.\n\n'
                         )
 
                     if suggestions_list:
@@ -929,7 +908,7 @@ async def chat_with_planner(
             step_number=4,
             needs_input=True,
             session_id=session_id,
-            placeholder="e.g. Scenic journeys, Famous trains, Adventure, Romance, Culture...",
+            placeholder="e.g. Culture, Adventure, Romance, Scenic...",
         )
 
     # ------------------------------------------------------------------
@@ -959,28 +938,28 @@ async def chat_with_planner(
 
         # Contextual acknowledgment based on trip type
         trip_ack_map = {
-            "romance": "Romance by rail -- there is nothing quite like it",
-            "romantic": "Romance by rail -- there is nothing quite like it",
-            "honeymoon": "Romance by rail -- there is nothing quite like it",
-            "culture": "Culture and heritage -- every station tells a story, every city reveals centuries of history",
-            "heritage": "Culture and heritage -- every station tells a story, every city reveals centuries of history",
-            "adventure": "Adventure awaits -- I will prioritise active, outdoor rail experiences",
-            "scenic": "Scenic routes are the crown jewels of rail travel -- expect breathtaking views",
-            "relaxation": "Relaxation is the art of slow travel -- let the train set the pace",
-            "relax": "Relaxation is the art of slow travel -- let the train set the pace",
-            "family": "Family memories made on rail are unforgettable",
-            "luxury": "Luxury rail is travel at its absolute finest",
-            "sightseeing": "Sightseeing by train -- the best views you will ever have from a window",
-            "train": "Famous rail journeys -- the trains themselves become the highlight",
-            "trains": "Famous rail journeys -- the trains themselves become the highlight",
-            "food": "Culinary discoveries by rail -- savour every region you pass through",
-            "culinary": "Culinary discoveries by rail -- savour every region you pass through",
-            "wine": "Culinary discoveries by rail -- savour every region you pass through",
-            "winter": "Winter rail journeys reveal a magical side of the landscape",
-            "snow": "Winter rail journeys reveal a magical side of the landscape",
-            "christmas": "Christmas markets by rail -- a truly festive experience",
-            "nature": "Nature at its finest -- the best way to experience the great outdoors",
-            "wildlife": "Nature at its finest -- the best way to experience the great outdoors",
+            "romance": "Romance by rail -- there is truly nothing like it",
+            "romantic": "Romance by rail -- there is truly nothing like it",
+            "honeymoon": "A honeymoon by train -- the most unforgettable way to begin",
+            "culture": "Culture and heritage -- every station tells a story worth discovering",
+            "heritage": "Culture and heritage -- every station tells a story worth discovering",
+            "adventure": "Adventure by rail -- bold journeys ahead",
+            "scenic": "Scenic routes -- I will find the most breathtaking views",
+            "relaxation": "Slow travel at its finest -- the journey is the destination",
+            "relax": "Slow travel at its finest -- the journey is the destination",
+            "family": "Family memories by rail -- experiences the whole family will treasure",
+            "luxury": "Luxury rail at its absolute finest -- world-class all the way",
+            "sightseeing": "Sightseeing by train -- the most rewarding way to explore",
+            "train": "Famous rail journeys -- where the train itself is the experience",
+            "trains": "Famous rail journeys -- where the train itself is the experience",
+            "food": "Culinary discovery by rail -- from vineyard to table",
+            "culinary": "Culinary discovery by rail -- from vineyard to table",
+            "wine": "Culinary discovery by rail -- from vineyard to table",
+            "winter": "Winter rail -- snow-dusted landscapes and cosy cabins",
+            "snow": "Winter rail -- snow-dusted landscapes and cosy cabins",
+            "christmas": "Christmas markets by rail -- pure festive magic",
+            "nature": "Nature at its finest -- through untouched landscapes",
+            "wildlife": "Nature at its finest -- through untouched landscapes",
         }
         # Check user's original input first for intent-based acknowledgment
         trip_ack = None
@@ -1007,7 +986,7 @@ async def chat_with_planner(
             step_number=5,
             needs_input=True,
             session_id=session_id,
-            placeholder="e.g. Anniversary, Honeymoon, Birthday, or just for fun...",
+            placeholder="e.g. Anniversary, Birthday, Just for fun...",
         )
 
     # ------------------------------------------------------------------
@@ -1039,21 +1018,18 @@ async def chat_with_planner(
 
         if occasion:
             occasion_ack = {
-                "Anniversary": "An anniversary celebration by rail -- I will curate something truly special.",
-                "Honeymoon": "A honeymoon by train -- the most romantic way to begin your journey together.",
-                "Birthday": "A birthday rail adventure -- what a way to celebrate.",
-                "Retirement": "Retirement deserves an extraordinary journey -- I will make it count.",
-                "Graduation": "Congratulations on the graduation -- time for a well-earned adventure.",
+                "Anniversary": "An anniversary journey by rail -- I will find something exceptional.",
+                "Honeymoon": "Honeymoon by train -- the most romantic way to begin your story.",
+                "Birthday": "A birthday rail adventure -- I will make it one to remember.",
+                "Retirement": "A well-earned retirement journey -- you deserve the extraordinary.",
+                "Graduation": "Congratulations -- a rail adventure is the perfect reward.",
             }
-            ack = occasion_ack.get(occasion, f"A {occasion.lower()} trip -- I will add that special touch.")
+            ack = occasion_ack.get(occasion, f"{occasion} -- noted.")
         elif u in SKIP_WORDS or "no special" in u or "just for fun" in u or "none" in u:
-            ack = "No special occasion -- the joy of rail travel is reason enough."
+            ack = "No special occasion -- the journey itself is the celebration."
         else:
             session["data"]["special_occasion"] = user_msg.title()
-            ack = f"Noted: {user_msg.title()}. I will keep that in mind."
-
-        # Get hotel tiers from DB
-        hotel_tiers = provider.get_hotel_tiers() if provider else []
+            ack = f"{user_msg.title()} -- noted."
 
         session["step"] = 6
         return ChatResponse(
@@ -1065,7 +1041,7 @@ async def chat_with_planner(
             step_number=6,
             needs_input=True,
             session_id=session_id,
-            placeholder="e.g. Luxury, Premium, Value, or no preference...",
+            placeholder="e.g. Luxury, Premium, Value, No preference...",
         )
 
     # ------------------------------------------------------------------
@@ -1104,15 +1080,15 @@ async def chat_with_planner(
         tier = session["data"]["hotel_tier"]
         if tier:
             tier_desc = {
-                "Luxury": "five-star luxury properties",
-                "Premium": "upscale, comfortable hotels",
-                "Value": "great-value, comfortable stays",
+                "Luxury": "world-class, five-star properties",
+                "Premium": "upscale, four-star hotels",
+                "Value": "comfortable, well-rated accommodation",
             }
-            ack = f"{tier} -- I will focus on {tier_desc.get(tier, 'matching hotels')}."
+            ack = f"{tier} -- {tier_desc.get(tier, 'I will match the right hotels')}."
         elif u in SKIP_WORDS or "no preference" in u:
-            ack = "No preference noted -- I will show a balanced range of accommodation levels."
+            ack = "No preference -- I will show a balanced range of options."
         else:
-            ack = "Noted -- I will find the best accommodation match."
+            ack = "Noted."
 
         session["step"] = 7
         return ChatResponse(
@@ -1124,7 +1100,7 @@ async def chat_with_planner(
             step_number=7,
             needs_input=True,
             session_id=session_id,
-            placeholder="e.g. First time, A few times, Very experienced...",
+            placeholder="e.g. First time, Experienced, Skip...",
         )
 
     # ------------------------------------------------------------------
@@ -1137,16 +1113,16 @@ async def chat_with_planner(
 
         if "first" in u or "never" in u or "no" == u.strip() or "nope" in u:
             session["data"]["rail_experience"] = "first_time"
-            ack = "First rail vacation -- exciting. I will select the most rewarding routes for newcomers."
+            ack = "Your first rail vacation -- I will select the most rewarding and easy-to-navigate routes."
         elif "few" in u or "some" in u or "couple" in u or "once" in u or "twice" in u:
             session["data"]["rail_experience"] = "experienced"
-            ack = "Some rail experience -- I can suggest more adventurous and off-the-beaten-path routes."
+            ack = "Some rail experience -- I can recommend more adventurous and off-the-beaten-path routes."
         elif "experienced" in u or "many" in u or "several" in u or "lots" in u or "veteran" in u:
             session["data"]["rail_experience"] = "very_experienced"
-            ack = "Seasoned rail traveller -- I will find exceptional journeys worthy of your expertise."
+            ack = "A seasoned rail traveller -- I will find journeys that match your expertise."
         elif u in SKIP_WORDS:
             session["data"]["rail_experience"] = None
-            ack = "No worries -- I will show a balanced selection."
+            ack = "No worries -- I will show a balanced selection of routes."
         else:
             session["data"]["rail_experience"] = "experienced"
             ack = f"Noted: {user_msg}."
@@ -1160,11 +1136,11 @@ async def chat_with_planner(
                 f"{ack}\n\n"
                 f"{t('q_budget', lang)}"
             ),
-            suggestions=["Find my perfect trips", "No budget limit"],
+            suggestions=t_list("budget_actions", lang),
             step_number=8,
             needs_input=True,
             session_id=session_id,
-            placeholder="Budget, accessibility needs, or click Find my perfect trips...",
+            placeholder="e.g. £5,000, No limit, Find my trips...",
         )
 
     # ------------------------------------------------------------------
@@ -1187,12 +1163,13 @@ async def chat_with_planner(
                     session["data"]["accessibility_needs"] = user_msg
                     break
 
-        # If the user explicitly requested a search (or provided a budget), run recommender now
-        SEARCH_TRIGGERS = ("find my", "search now", "trouver mes", "rechercher",
+        # If the user explicitly requested a search, run recommender now.
+        # Budget amounts and "no budget/no limit" advance to confirmation (step 9).
+        SEARCH_TRIGGERS = ("find my", "search now", "find trips", "trouver mes", "rechercher",
                            "encontrar mis", "buscar ahora", "meine perfekten",
                            "jetzt suchen", "trova i miei", "cerca ora",
                            "\u6211\u7684\u5b8c\u7f8e\u65c5\u884c", "\u7acb\u5373\u641c\u7d22", "\u0905\u092d\u0940 \u0916\u094b\u091c\u0947\u0902")
-        if any(tr in user_lower for tr in SEARCH_TRIGGERS) or budget_nums:
+        if any(tr in user_lower for tr in SEARCH_TRIGGERS):
             data = session["data"]
             recommender = PackageRecommender(db)
 
@@ -1268,7 +1245,7 @@ async def chat_with_planner(
                 b_sym = data.get("currency_sym", "\u00a3")
                 summary_parts.append(f"Budget: up to {b_sym}{data['budget']} per person")
 
-            summary = "\n".join(f"  - {p}" for p in summary_parts)
+            summary = "\n".join(f"  \u2022 {p}" for p in summary_parts)
 
             if recs:
                 top_score = recs[0].get("match_score", 0)
@@ -1280,15 +1257,17 @@ async def chat_with_planner(
                             total_countries.add(c)
                 country_span = f" across {len(total_countries)} countries" if len(total_countries) > 1 else ""
                 message = (
-                    f"{t('here_is_searched', lang)}\n\n{summary}\n\n"
+                    f"**Your Journey Brief**\n\n{summary}\n\n"
+                    f"---\n\n"
                     f"**{pkg_count:,} packages analysed.** "
-                    f"Found **{len(recs)} outstanding matches**{country_span} "
-                    f"(top score: {top_score:.0f}%).\n\n"
+                    f"I found **{len(recs)} exceptional matches**{country_span} "
+                    f"(best match: {top_score:.0f}%).\n\n"
                     f"{t('your_recs', lang)}"
                 )
             else:
                 message = (
-                    f"{t('here_is_searched', lang)}\n\n{summary}\n\n"
+                    f"**Your Journey Brief**\n\n{summary}\n\n"
+                    f"---\n\n"
                     f"{t('no_matches', lang)}"
                 )
 
@@ -1340,12 +1319,13 @@ async def chat_with_planner(
             b_sym = data.get("currency_sym", "\u00a3")
             summary_parts.append(f"Budget: up to {b_sym}{data['budget']} per person")
 
-        summary = "\n".join(f"  - {p}" for p in summary_parts)
+        summary = "\n".join(f"  \u2022 {p}" for p in summary_parts)
 
         session["step"] = 9
         return ChatResponse(
             message=(
-                f"{t('here_is_search', lang)}\n\n{summary}\n\n"
+                f"**Your Journey Brief**\n\n{summary}\n\n"
+                f"---\n\n"
                 f"{t('does_look_right', lang)}"
             ),
             suggestions=t_list("confirm_search", lang),
@@ -1366,11 +1346,7 @@ async def chat_with_planner(
             session["_ts"] = time.time()
             session["step"] = 1
             return ChatResponse(
-                message=(
-                    "No problem -- let us refine your search.\n\n"
-                    "**Where would you like to go?**\n"
-                    "Type a country, city, or region below."
-                ),
+                message="No problem. Let us refine your preferences.\n\n**Where would you like to go?**",
                 suggestions=None,
                 step_number=1,
                 needs_input=True,
@@ -1431,8 +1407,8 @@ async def chat_with_planner(
             country_span = f" across {len(total_countries)} countries" if len(total_countries) > 1 else ""
             message = (
                 f"**{pkg_count:,} packages analysed.** "
-                f"Found **{len(recs)} outstanding matches**{country_span} "
-                f"(top score: {top_score:.0f}%).\n\n"
+                f"I found **{len(recs)} exceptional matches**{country_span} "
+                f"(best match: {top_score:.0f}%).\n\n"
                 f"{t('your_recs', lang)}"
             )
         else:
@@ -1456,11 +1432,7 @@ async def chat_with_planner(
     # ------------------------------------------------------------------
     conversation_sessions[session_id] = _new_session()
     return ChatResponse(
-        message=(
-            "Let us start fresh.\n\n"
-            "**Where would you like to go?**\n"
-            "Type a country, city, or region below."
-        ),
+        message="Let us start fresh.\n\n**Where would you like to go?**",
         suggestions=None,
         step_number=1,
         needs_input=True,

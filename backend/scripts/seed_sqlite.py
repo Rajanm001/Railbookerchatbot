@@ -8,8 +8,9 @@ import json
 import os
 import sys
 
-# Add parent directory to path for app imports
-sys.path.insert(0, os.path.dirname(__file__))
+# Add backend directory to path for app imports
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _BACKEND_DIR)
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -19,8 +20,8 @@ from app.db.models import Base, TravelPackage
 
 
 def main():
-    # Database path
-    db_path = os.path.join(os.path.dirname(__file__), "rail_planner.db")
+    # Database path (in backend/ root so the app can find it)
+    db_path = os.path.join(_BACKEND_DIR, "rail_planner.db")
     db_url = f"sqlite:///{db_path}"
 
     print(f"Database: {db_path}")
@@ -46,7 +47,7 @@ def main():
 
     # Load JSON data
     json_path = os.path.join(
-        os.path.dirname(__file__),
+        _BACKEND_DIR,
         "app", "ingestion", "cleaned_packages.json",
     )
 

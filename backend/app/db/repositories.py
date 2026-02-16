@@ -65,7 +65,7 @@ class TravelPackageRepository:
         """
         Filter packages by multiple criteria from Excel data.
         All filters are optional - only applied if provided.
-        SQL-first, no hallucination.
+        SQL-first, database-driven.
         """
         try:
             query = self.db.query(TravelPackage)

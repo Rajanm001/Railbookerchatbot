@@ -70,7 +70,7 @@ def filter_packages(
 ):
     """
     Filter packages by multiple criteria.
-    All filters are optional - SQL-first, no hallucination.
+    All filters are optional. SQL-first, database-driven.
     """
     repo = TravelPackageRepository(db)
     packages = repo.filter_packages(
@@ -96,7 +96,7 @@ def recommend_packages(
 ):
     """
     Get recommended packages based on criteria.
-    SQL-first recommendations - no AI guessing.
+    SQL-first recommendations, database-driven.
     """
     repo = TravelPackageRepository(db)
     packages = repo.recommend_packages(

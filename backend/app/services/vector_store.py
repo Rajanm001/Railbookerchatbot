@@ -194,7 +194,7 @@ class VectorStore:
 
     TABLE_DDL = """
     CREATE TABLE IF NOT EXISTS package_vectors (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         package_id INTEGER UNIQUE NOT NULL,
         text_content TEXT,
         vector TEXT NOT NULL DEFAULT '{}'
@@ -210,6 +210,12 @@ class VectorStore:
         built_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """
+
+    # Upsert for vectorizer state (PostgreSQL-compatible)
+    VECTORIZER_UPSERT = (
+        "INSERT INTO vectorizer_state (id, state) VALUES (1, :state) "
+        "ON CONFLICT (id) DO UPDATE SET state = EXCLUDED.state, built_at = CURRENT_TIMESTAMP"
+    )
 
     def __init__(self, db: Session):
         self.db = db
@@ -282,9 +288,7 @@ class VectorStore:
             self.db.commit()
 
         # Store vectorizer state
-        self.db.execute(text(
-            "INSERT INTO vectorizer_state (id, state) VALUES (1, :state)"
-        ), {"state": vectorizer.to_json()})
+        self.db.execute(text(self.VECTORIZER_UPSERT), {"state": vectorizer.to_json()})
         self.db.commit()
 
         # Update module cache

@@ -66,7 +66,7 @@ data, resp = api_get("/health/")
 test("Health 200", resp.status == 200)
 test("Status healthy", data["status"] == "healthy")
 test("Database available", data["database"] == "available")
-test("2000 packages", data["packages"] >= 1990)
+test("1995 packages", data["packages"] >= 1990)
 
 data, resp = api_get("/health/ready")
 test("Ready check", data.get("ready") == True)
@@ -173,12 +173,12 @@ test("Step 3: Dates", "10" in data["message"] or "summer" in data["message"].low
 # Step 4: Trip Purpose
 data, _ = api_post("/planner/chat", {"message": "Romance", "session_id": session_id})
 test("Step 4: Trip Purpose", len(data["message"]) > 20)
-test("Step 4: Has occasion options", "occasion" in data["message"].lower() or "celebrating" in data["message"].lower())
+test("Step 4: Has occasion options", "occasion" in data["message"].lower() or "celebrating" in data["message"].lower() or "moment" in data["message"].lower() or "milestone" in data["message"].lower())
 
 # Step 5: Special Occasion
 data, _ = api_post("/planner/chat", {"message": "Anniversary", "session_id": session_id})
 test("Step 5: Occasion", "anniversary" in data["message"].lower())
-test("Step 5: Hotel question", "hotel" in data["message"].lower())
+test("Step 5: Hotel question", "hotel" in data["message"].lower() or "accommodation" in data["message"].lower())
 
 # Step 6: Hotel Preference
 data, _ = api_post("/planner/chat", {"message": "Luxury", "session_id": session_id})
@@ -192,7 +192,7 @@ test("Step 7: Budget question", "budget" in data["message"].lower() or "find my"
 
 # Step 8: Budget -> Recommendations (Find my perfect trips skips summary)
 data, _ = api_post("/planner/chat", {"message": "Find my perfect trips", "session_id": session_id})
-test("Step 8: Summary shown", "searched for" in data["message"].lower() or "search for" in data["message"].lower())
+test("Step 8: Summary shown", "journey brief" in data["message"].lower() or "packages analysed" in data["message"].lower() or "recommendations" in data["message"].lower())
 test("Step 8: Has suggestions", len(data.get("suggestions") or []) > 0)
 
 # Recommendations are already in this response
@@ -222,7 +222,7 @@ try:
     html = resp.read().decode()
     test("Frontend 200", resp.status == 200)
     test("Railbookers in HTML", "Railbookers" in html)
-    test("Cache bust v2", "v=20260211h" in html)
+    test("Cache bust v2", "v=202602112230" in html)
     test("Premium CSS loaded", "premium-chat.css" in html)
 except Exception as e:
     test("Frontend reachable", False, str(e))
